@@ -1,0 +1,130 @@
+1
+2
+qwerty A sting.h text.txt
+f
+arbuz
+void printError(int code, char **patterns, char **files) {
+  switch (code) {
+    case 1:
+      fprintf(stderr, "Something wrong with pattern.");
+      break;
+    case 2:
+      fprintf(stderr, "Could not compile regex\n");
+      break;
+    case 3:
+      fprintf(stderr, "Something wrong with file.");
+      break;
+    case 4:
+      fprintf(stderr, "Something wring with memory");
+      break;
+    case 5:
+      fprintf(stderr, "Something wrong with flags");
+      break;
+  }
+  clean(patterns);
+  clean(files);
+  exit(1);
+}
+
+int parsFlag(char *flags, opt *options, char **patterns, int *in, char **files,
+             int *reqPattern) {
+  int status = 0;
+  for (int i = 1; i < (int)strlen(flags); i++) {
+    switch (flags[i]) {
+      case 'e':
+        if (i == ((int)strlen(flags) - 1)) {
+          options->e = 1;
+          options->f = 0;
+        } else {
+          int j = 0;
+          patterns[*in] = calloc(300, sizeof(char));
+          if (!patterns[*in]) {
+            printError(1, patterns, files);
+          }
+          while (j + i + 1 < (int)strlen(flags)) {
+            patterns[*in][j] = flags[j + i + 1];
+            j++;
+          }
+          (*in)++;
+          i = (int)strlen(flags) - 1;
+          options->e = 0;
+          options->f = 0;
+          *reqPattern = 1;
+        }
+        break;
+      case 'i':
+        options->i = 1;
+        break;
+      case 'v':
+        options->v = 1;
+        break;
+      case 'c':
+        options->c = 1;
+        break;
+      case 'l':
+        options->l = 1;
+        break;
+      case 'n':
+        options->n = 1;
+        break;
+      case 'h':
+        options->h = 1;
+        break;
+      case 's':
+        options->s = 1;
+        break;
+      case 'f':
+        options->f = 1;
+        if (i != ((int)strlen(flags) - 1)) {
+          status = 1;
+        }
+        break;
+      case 'o':
+        options->o = 1;
+        break;
+      default:
+        printError(1, patterns, files);
+    }
+  }
+  return status;
+}
+
+void parser(int argc, char **argv, char **files, opt *options, char **patterns,
+            int *countFiles) {
+  int i = 0;
+  int i_file = 0;
+  int index = 1;
+  int reqPattern = 0;
+  int reqFiles = 0;
+  char pat[SIZE] = {'\0'};
+
+  while (index < argc) {
+    if (isFile(argv[index], countFiles)) {
+      reqFiles = 1;
+
+      files[i_file] = malloc(SIZE * sizeof(char));
+      if (!files[i_file]) printError(3, patterns, files);
+      strcpy(files[i_file], argv[index]);
+      i_file++;
+
+    } else if (argv[index][0] == '-') {
+      if (parsFlag(argv[index], options, patterns, &i, files, &reqPattern)) {
+        printError(5, patterns, files);
+      }
+      if (options->f) {
+        FILE *f;
+        if ((f = fopen(argv[++index], "r")) == NULL) {
+          if (!options->s)
+            printError(1, patterns, files);
+          else {
+            printError(2, patterns, files);
+          }
+        }
+        while (fgets(pat, SIZE, f) != NULL) {
+          if (pat[strlen(pat) - 1] == '\n') pat[strlen(pat) - 1] = '\0';
+          patterns[i] = malloc(SIZE * sizeof(char));
+          if (!patterns[i]) printError(3, patterns, files);
+          strcpy(patterns[i], pat);
+          i++;
+        }
+        fclose(f);
