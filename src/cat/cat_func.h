@@ -21,5 +21,4 @@ int fileisopen(int argc, char* argv[], int i); // return 1 - closed, 0 - open
 
 int fileoutput(char* argv[], int i, opt options);
 
-
 #endif

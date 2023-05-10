@@ -8,11 +8,14 @@ int main(int argc, char *argv[]) {
   opt options = {INIT};
   char *patterns[SIZE] = {'\0'};
 
-  if (argc > 1) {
+  if (argc > 1)
+  {
     parser(argc, argv, files, &options, patterns, &countFiles);
 
     reader(files, options, patterns, countFiles);
-  } else {
+  }
+  else
+  {
     fprintf(stderr, "Something wrong with arguments");
   }
 

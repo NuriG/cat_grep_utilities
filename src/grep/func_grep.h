@@ -18,8 +18,6 @@ typedef struct options {
     int return_no_such_file_for_f;
     char templateSave[1024][1024];
     int templateCounter;
-    char templateSaveAsFile[1024][1024];
-    int templateCounterAsFile;
     char fileSave[1024][1024];
     int fileCounter;
 } opt;
@@ -31,8 +29,6 @@ void parcer(int argc, char* argv[], opt* options);
 void testoptions(opt options);
 
 int fileisopenOptions(char (*argv)[200], int i);
-
-int fileoutput(char (*argv)[200], int i, opt options);
 
 void func_check_e(int argc, char* argv[], opt* options);
 
